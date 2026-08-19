@@ -1,0 +1,176 @@
+-- PAO MUSIC PLAYER
+-- เครดิต: กันเจาะโดยเปา
+-- LocalScript > StarterPlayerScripts
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "PaoMusic"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local sound = Instance.new("Sound")
+sound.Name = "PaoMusicSound"
+sound.Looped = true
+sound.Volume = 1
+sound.Parent = workspace
+
+local main = Instance.new("Frame")
+main.Size = UDim2.fromOffset(340,300)
+main.Position = UDim2.new(.5,-170,.5,-150)
+main.BackgroundColor3 = Color3.fromRGB(25,25,32)
+main.BorderSizePixel = 0
+main.Parent = gui
+
+Instance.new("UICorner",main).CornerRadius = UDim.new(0,14)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,50)
+title.BackgroundTransparency = 1
+title.Text = "🎵 PAO MUSIC"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.Parent = main
+
+local id = Instance.new("TextBox")
+id.Size = UDim2.new(1,-30,0,42)
+id.Position = UDim2.fromOffset(15,60)
+id.PlaceholderText = "ใส่ Music ID"
+id.Text = ""
+id.TextSize = 16
+id.TextColor3 = Color3.new(1,1,1)
+id.BackgroundColor3 = Color3.fromRGB(40,40,50)
+id.Parent = main
+
+Instance.new("UICorner",id).CornerRadius = UDim.new(0,8)
+
+local play = Instance.new("TextButton")
+play.Size = UDim2.fromOffset(150,42)
+play.Position = UDim2.fromOffset(15,115)
+play.Text = "▶ PLAY"
+play.TextSize = 16
+play.Font = Enum.Font.GothamBold
+play.BackgroundColor3 = Color3.fromRGB(40,140,80)
+play.TextColor3 = Color3.new(1,1,1)
+play.Parent = main
+
+Instance.new("UICorner",play).CornerRadius = UDim.new(0,8)
+
+local stop = Instance.new("TextButton")
+stop.Size = UDim2.fromOffset(150,42)
+stop.Position = UDim2.fromOffset(175,115)
+stop.Text = "■ STOP"
+stop.TextSize = 16
+stop.Font = Enum.Font.GothamBold
+stop.BackgroundColor3 = Color3.fromRGB(150,55,55)
+stop.TextColor3 = Color3.new(1,1,1)
+stop.Parent = main
+
+Instance.new("UICorner",stop).CornerRadius = UDim.new(0,8)
+
+local vol = Instance.new("TextBox")
+vol.Size = UDim2.new(1,-30,0,42)
+vol.Position = UDim2.fromOffset(15,170)
+vol.Text = "100"
+vol.PlaceholderText = "Volume 0-100"
+vol.TextSize = 16
+vol.TextColor3 = Color3.new(1,1,1)
+vol.BackgroundColor3 = Color3.fromRGB(40,40,50)
+vol.Parent = main
+
+Instance.new("UICorner",vol).CornerRadius = UDim.new(0,8)
+
+local loop = Instance.new("TextButton")
+loop.Size = UDim2.new(1,-30,0,38)
+loop.Position = UDim2.fromOffset(15,220)
+loop.Text = "🔁 LOOP : ON"
+loop.TextSize = 15
+loop.Font = Enum.Font.GothamBold
+loop.TextColor3 = Color3.new(1,1,1)
+loop.BackgroundColor3 = Color3.fromRGB(55,55,65)
+loop.Parent = main
+
+Instance.new("UICorner",loop).CornerRadius = UDim.new(0,8)
+
+local credit = Instance.new("TextLabel")
+credit.Size = UDim2.new(1,0,0,20)
+credit.Position = UDim2.fromOffset(0,270)
+credit.BackgroundTransparency = 1
+credit.Text = "🔒 กันเจาะโดยเปา"
+credit.TextColor3 = Color3.fromRGB(160,160,160)
+credit.TextSize = 11
+credit.Parent = main
+
+local looping = true
+
+play.MouseButton1Click:Connect(function()
+	local musicId = id.Text:match("%d+")
+
+	if musicId then
+		sound:Stop()
+		sound.SoundId = "rbxassetid://" .. musicId
+		sound:Play()
+	end
+end)
+
+stop.MouseButton1Click:Connect(function()
+	sound:Stop()
+end)
+
+vol.FocusLost:Connect(function()
+	local value = math.clamp(tonumber(vol.Text) or 100,0,100)
+	vol.Text = tostring(value)
+	sound.Volume = value / 100
+end)
+
+loop.MouseButton1Click:Connect(function()
+	looping = not looping
+	sound.Looped = looping
+
+	loop.Text = looping
+		and "🔁 LOOP : ON"
+		or "🔁 LOOP : OFF"
+end)
+
+-- ลากหน้าต่าง
+local dragging = false
+local dragStart
+local startPos
+
+title.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+
+		dragging = true
+		dragStart = input.Position
+		startPos = main.Position
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if not dragging then return end
+
+	if input.UserInputType == Enum.UserInputType.MouseMovement
+	or input.UserInputType == Enum.UserInputType.Touch then
+
+		local delta = input.Position - dragStart
+
+		main.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = false
+	end
+end)
